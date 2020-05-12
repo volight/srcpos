@@ -1,0 +1,25 @@
+[package]
+name = "srcpos"
+version = "1.0.0"
+authors = ["Package <Aditrc@outlook.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+[dependencies.serde]
+default-features = false
+optional = true
+version = "1"
+features = ["derive"]
+
+[features]
+default = ["serde", "std"]
+std = []
+
+[package.metadata.docs.rs]
+features = ["serde"]
+
+[package.metadata.playground]
+features = ["serde"]
