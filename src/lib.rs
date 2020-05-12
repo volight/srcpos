@@ -310,7 +310,7 @@ pub const fn loc(from: Pos, to: Pos) -> Loc {
 #[macro_export]
 macro_rules! pos {
     () => {
-        pos(0, line!() as usize, column!() as usize)
+        $crate::pos(0, line!() as usize, column!() as usize)
     };
 }
 

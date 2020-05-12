@@ -15,8 +15,7 @@ version = "1"
 features = ["derive"]
 
 [features]
-default = ["serde", "std"]
-std = []
+default = ["serde"]
 
 [package.metadata.docs.rs]
 features = ["serde"]
