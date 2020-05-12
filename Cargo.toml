@@ -8,6 +8,7 @@ description = "Structure of the location in the source code"
 repository = "https://github.com/MeowType/srcpos"
 readme = "README.md"
 keywords = ["source", "position", "location", "sourcemap"]
+categories = ["data-structures", "parsing", "text-processing", "development-tools::procedural-macro-helpers", "development-tools::debugging"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
