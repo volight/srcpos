@@ -120,6 +120,26 @@ pub const fn pos(line: usize, column: usize) -> Pos {
     Pos::new(line, column)
 }
 
+/// Build Pos
+/// # Examples
+/// ```
+/// # use srcpos::*;
+/// let a = posof!(1, 2);
+/// let b = posof!([1, 2]);
+/// let c = posof![1, 2];
+/// assert_eq!(a, b);
+/// assert_eq!(b, c);
+/// ```
+#[macro_export]
+macro_rules! posof {
+    ($a:expr, $b:expr) => {
+        $crate::pos($a, $b)
+    };
+    ($a:expr) => {
+        $crate::Pos::from($a)
+    };
+}
+
 //\/////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Range of Posation in source code
@@ -184,6 +204,7 @@ impl Default for Loc {
     }
 }
 
+// #region From Into Basic Misc
 impl From<(usize, usize, usize, usize)> for Loc {
     #[inline]
     fn from((a1, b1, a2, b2): (usize, usize, usize, usize)) -> Self {
@@ -217,27 +238,6 @@ impl Into<[usize; 4]> for Loc {
         ]
     }
 }
-impl From<((usize, usize), (usize, usize))> for Loc {
-    #[inline]
-    fn from(((a1, b1), (a2, b2)): ((usize, usize), (usize, usize))) -> Self {
-        Self::new_at(a1, b1, a2, b2)
-    }
-}
-impl Into<((usize, usize), (usize, usize))> for Loc {
-    #[inline]
-    fn into(self) -> ((usize, usize), (usize, usize)) {
-        (
-            (self.from.line, self.from.column),
-            (self.to.line, self.to.column),
-        )
-    }
-}
-impl From<[[usize; 2]; 2]> for Loc {
-    #[inline]
-    fn from([[a1, b1], [a2, b2]]: [[usize; 2]; 2]) -> Self {
-        Self::new_at(a1, b1, a2, b2)
-    }
-}
 impl Into<[[usize; 2]; 2]> for Loc {
     #[inline]
     fn into(self) -> [[usize; 2]; 2] {
@@ -247,12 +247,6 @@ impl Into<[[usize; 2]; 2]> for Loc {
         ]
     }
 }
-impl From<[(usize, usize); 2]> for Loc {
-    #[inline]
-    fn from([(a1, b1), (a2, b2)]: [(usize, usize); 2]) -> Self {
-        Self::new_at(a1, b1, a2, b2)
-    }
-}
 impl Into<[(usize, usize); 2]> for Loc {
     #[inline]
     fn into(self) -> [(usize, usize); 2] {
@@ -260,38 +254,6 @@ impl Into<[(usize, usize); 2]> for Loc {
             (self.from.line, self.from.column),
             (self.to.line, self.to.column),
         ]
-    }
-}
-impl From<([usize; 2], [usize; 2])> for Loc {
-    #[inline]
-    fn from(([a1, b1], [a2, b2]): ([usize; 2], [usize; 2])) -> Self {
-        Self::new_at(a1, b1, a2, b2)
-    }
-}
-impl Into<([usize; 2], [usize; 2])> for Loc {
-    #[inline]
-    fn into(self) -> ([usize; 2], [usize; 2]) {
-        (
-            [self.from.line, self.from.column],
-            [self.to.line, self.to.column],
-        )
-    }
-}
-impl From<(usize, usize)> for Loc {
-    #[inline]
-    fn from((line, column): (usize, usize)) -> Self {
-        Self::new_same_pos(Pos::new(line, column))
-    }
-}
-impl Into<(usize, usize)> for Loc {
-    fn into(self) -> (usize, usize) {
-        (self.from.line, self.from.column)
-    }
-}
-impl From<[usize; 2]> for Loc {
-    #[inline]
-    fn from([line, column]: [usize; 2]) -> Self {
-        Self::new_same_pos(Pos::new(line, column))
     }
 }
 impl Into<[usize; 2]> for Loc {
@@ -312,12 +274,6 @@ impl Into<usize> for Loc {
         self.from.line
     }
 }
-impl From<[usize; 1]> for Loc {
-    #[inline]
-    fn from([value]: [usize; 1]) -> Self {
-        Self::new_same(value)
-    }
-}
 impl Into<[usize; 1]> for Loc {
     #[inline]
     fn into(self) -> [usize; 1] {
@@ -336,58 +292,64 @@ impl<T> From<[T; 0]> for Loc {
         Self::zero()
     }
 }
-impl From<Range<Pos>> for Loc {
+// #endregion
+
+// #region From Into Range
+impl<T: Into<Pos>> From<Range<T>> for Loc {
     #[inline]
-    fn from(r: Range<Pos>) -> Self {
-        Self::new(r.start, r.end)
+    fn from(r: Range<T>) -> Self {
+        Self::new(r.start.into(), r.end.into())
     }
 }
-impl Into<Range<Pos>> for Loc {
+impl<T: From<Pos>> Into<Range<T>> for Loc {
     #[inline]
-    fn into(self) -> Range<Pos> {
-        self.from..self.to
+    fn into(self) -> Range<T> {
+        self.from.into()..self.to.into()
     }
 }
-impl From<RangeTo<Pos>> for Loc {
+impl<T: Into<Pos>> From<RangeTo<T>> for Loc {
     #[inline]
-    fn from(r: RangeTo<Pos>) -> Self {
-        Self::new(Pos::zero(), r.end)
+    fn from(r: RangeTo<T>) -> Self {
+        Self::new(Pos::zero(), r.end.into())
     }
 }
-impl Into<RangeTo<Pos>> for Loc {
+impl<T: From<Pos>> Into<RangeTo<T>> for Loc {
     #[inline]
-    fn into(self) -> RangeTo<Pos> {
-        ..self.to
+    fn into(self) -> RangeTo<T> {
+        ..self.to.into()
     }
 }
-impl Into<RangeFrom<Pos>> for Loc {
+impl<T: From<Pos>> Into<RangeFrom<T>> for Loc {
     #[inline]
-    fn into(self) -> RangeFrom<Pos> {
-        self.to..
+    fn into(self) -> RangeFrom<T> {
+        self.from.into()..
     }
 }
-impl From<(Pos, Pos)> for Loc {
+// #endregion
+
+// #region From Into Misc
+impl<T: Into<Pos>> From<(T, T)> for Loc {
     #[inline]
-    fn from((from, to): (Pos, Pos)) -> Self {
-        Self::new(from, to)
+    fn from((from, to): (T, T)) -> Self {
+        Self::new(from.into(), to.into())
     }
 }
-impl Into<(Pos, Pos)> for Loc {
+impl<T: From<Pos>> Into<(T, T)> for Loc {
     #[inline]
-    fn into(self) -> (Pos, Pos) {
-        (self.from, self.to)
+    fn into(self) -> (T, T) {
+        (self.from.into(), self.to.into())
     }
 }
-impl From<[Pos; 2]> for Loc {
+impl<T: Into<Pos>> From<[T; 2]> for Loc {
     #[inline]
-    fn from([from, to]: [Pos; 2]) -> Self {
-        Self::new(from, to)
+    fn from([from, to]: [T; 2]) -> Self {
+        Self::new(from.into(), to.into())
     }
 }
-impl Into<[Pos; 2]> for Loc {
+impl<T: From<Pos>> Into<[T; 2]> for Loc {
     #[inline]
-    fn into(self) -> [Pos; 2] {
-        [self.from, self.to]
+    fn into(self) -> [T; 2] {
+        [self.from.into(), self.to.into()]
     }
 }
 impl From<Pos> for Loc {
@@ -402,24 +364,54 @@ impl Into<Pos> for Loc {
         self.from
     }
 }
-impl From<[Pos; 1]> for Loc {
+impl<T: Into<Pos>> From<[T; 1]> for Loc {
     #[inline]
-    fn from([pos]: [Pos; 1]) -> Self {
-        Self::new_same_pos(pos)
+    fn from([pos]: [T; 1]) -> Self {
+        Self::new_same_pos(pos.into())
     }
 }
-impl Into<[Pos; 1]> for Loc {
+impl<T: From<Pos>> Into<[T; 1]> for Loc {
     #[inline]
-    fn into(self) -> [Pos; 1] {
-        [self.from]
+    fn into(self) -> [T; 1] {
+        [self.from.into()]
     }
 }
+// #endregion
 
 /// Shorthand for Loc::new
 #[inline]
 pub const fn loc(from: Pos, to: Pos) -> Loc {
     Loc::new(from, to)
 }
+
+/// Build Loc  
+/// # Examples
+/// ```
+/// # use srcpos::*;
+/// let a = locof!(pos(1, 2), pos(3, 4));
+/// let b = locof!([1, 2], [3, 4]);
+/// let c = locof!(1, 2, 3, 4);
+/// let d = locof!(pos(1, 2)..pos(3, 4));
+/// let e = locof![1, 2, 3, 4];
+/// assert_eq!(a, b);
+/// assert_eq!(b, c);
+/// assert_eq!(c, d);
+/// assert_eq!(d, e);
+/// ```
+#[macro_export]
+macro_rules! locof {
+    ($from:expr, $to:expr) => {
+        $crate::loc($from.into(), $to.into())
+    };
+    ($a:expr, $b:expr, $c:expr, $d:expr) => {
+        $crate::loc(pos($a, $b), pos($c, $d))
+    };
+    ($v:expr) => {
+        $crate::Loc::from($v)
+    };
+}
+
+//\/////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Expands to the pos on which it was invoked.
 /// ## See
